@@ -1,0 +1,56 @@
+#bootstrap is the platform you are creating the base image from.  This could be shub (singularity hub)
+Bootstrap: docker
+#from is the specific file you are building from
+From: ubuntu:16.04
+
+#for example, put a message here that says what the container is about
+%runscript
+	exec echo "This container should have all conda prereqs"
+
+#put files here that need to be referenced in the container (cause you can't download directly to a container)
+%files
+
+#any environment variables you'd like to create
+%environment
+	PATH=/opt/anaconda3/bin/:$PATH
+	CUDA_HOME=/usr/local/cuda-9.1/
+
+#for example, add AUTHOR email so people know who to contact
+%labels
+
+#put your package installs here.  Think of this as all of the commands you need to get your environment set up
+%post
+	apt update
+	apt install -y \
+		vim \
+		git \
+		bzip2 \
+		wget \
+		libgl-dev \
+		libgtk2.0-0 \
+		libgdk-pixbuf2.0-0 \
+		libfontconfig1 \
+		libxrender1 \
+		libx11-6 \
+		libglib2.0-0  \
+		libxft2 \
+		libfreetype6 \
+		libc6 \
+		zlib1g \
+		libpng12-0 \
+		libstdc++6-4.8-dbg-arm64-cross \
+		libgcc1 \
+		ocl-icd-opencl-dev
+
+	wget https://repo.anaconda.com/archive/Anaconda3-5.1.0-Linux-x86_64.sh -O ~/anaconda3.sh
+	bash ~/anaconda3.sh -b -p /opt/anaconda3
+
+	export CMAKE_PREFIX_PATH=/opt/anaconda3
+	export CUDA_HOME=/usr/local/cuda-9.1/ 
+	export PATH=/opt/anaconda3/bin/:$PATH
+
+	conda update -y -n base conda
+	
+	pip install --upgrade pip
+	pip install nengo
+
